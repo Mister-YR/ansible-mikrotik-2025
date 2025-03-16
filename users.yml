@@ -8,3 +8,4 @@ users:
   - name: "user3"
     password: "Secure-Pass"
     group: read
+    

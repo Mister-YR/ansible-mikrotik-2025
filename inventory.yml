@@ -4,7 +4,7 @@ all:
       hosts:
         router-5009:
           ansible_host: 10.66.66.4
-        router-5009-BabPOE:
+        router-5009-rem:
           ansible_host: 10.66.66.6
         router-hex-poe:
           ansible_host: 10.66.66.7
