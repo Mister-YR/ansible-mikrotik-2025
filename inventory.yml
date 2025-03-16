@@ -1,0 +1,18 @@
+all:
+  children:
+    mikrotik:
+      hosts:
+        router-5009:
+          ansible_host: 10.66.66.4
+        router-5009-BabPOE:
+          ansible_host: 10.66.66.6
+        router-hex-poe:
+          ansible_host: 10.66.66.7
+      vars:
+        ansible_user: admin
+        ansible_password: "Secure_Pass"
+        ansible_network_os: routeros
+        ansible_connection: network_cli
+        ansible_become: false
+        ansible_ssh_host_key_checking: False
+        ansible_ssh_extra_args: "-o PreferredAuthentications=password"

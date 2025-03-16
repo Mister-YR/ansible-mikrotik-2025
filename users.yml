@@ -1,0 +1,10 @@
+users:
+  - name: "user1"
+    password: "Secure-Pass"
+    group: full
+  - name: "user2"
+    password: "Secure-Pass"
+    group: read
+  - name: "user3"
+    password: "Secure-Pass"
+    group: read

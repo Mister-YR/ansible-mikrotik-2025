@@ -1,0 +1,64 @@
+- name: Manage MikroTik Users
+  hosts: mikrotik
+  gather_facts: false
+  vars_files:
+    - users.yml
+
+  tasks:
+      # get date to create user with comment 
+    - name: get date
+      ansible.builtin.set_fact:
+        current_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+      # get users from rourers, before changes
+    - name: get existing users from routeros
+      routeros_command:
+        commands: /user print terse
+      register: existing_users
+      # parse users from router
+    - name: parce existing users
+      ansible.builtin.set_fact:
+       existing_users_list: "{{ existing_users.stdout | join('\n') | regex_findall('name=(\\S+)') }}"
+      # show existing users
+    - name: sh existing users
+      ansible.builtin.debug:
+        var: existing_users_list
+      # get users from list
+    - name: get target users
+      ansible.builtin.set_fact:
+        allowed_users: "{{ users | map(attribute='name') | list }}"
+      # show users from list
+    - name: sh allowed_users
+      ansible.builtin.debug:
+        var: allowed_users
+      # rm users except admin
+    - name: rm un allowed users
+      routeros_command:
+        commands:
+          - /user remove [find name={{ item }}]
+      loop: "{{ existing_users_list | difference(allowed_users) | reject('search', '^admin$') | list }}"
+      loop_control:
+        label: "{{ item }}"
+      when: existing_users_list | difference(allowed_users) | reject('search', '^admin$') | list | length > 0  
+      # show users from file
+    - name: sh users from file
+      ansible.builtin.debug:
+        var: users
+      # get users from file & update on routers
+    - name: add\update users
+      routeros_command:
+        commands:
+          - /user set [find name={{ item.name }}] password={{ item.password }} group={{ item.group }}
+          - /user add name={{ item.name }} password={{ item.password }} group={{ item.group }} disabled=no comment={{ current_date }} 
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.name }}"
+      ignore_errors: true
+      # prepeare to user debug print
+    - name: put users in to var
+      routeros_command:
+        commands: /user print
+      register: user_list
+      # show users in CLI
+    - name: print 
+      debug:
+        var: user_list.stdout_lines
